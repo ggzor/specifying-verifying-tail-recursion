@@ -12,7 +12,8 @@ reverse-tail : List A -> List A -> List A
 reverse-tail [] ys = ys
 reverse-tail (x ∷ xs) ys = reverse-tail xs (x ∷ ys)
 
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; trans; subst)
+open import Relation.Binary.PropositionalEquality
+  using (_≡_; refl; cong; sym; trans; subst)
 
 reverse-pull-generalized :
   ∀ (xs ys zs : List A)

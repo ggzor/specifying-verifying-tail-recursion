@@ -1,5 +1,6 @@
 open import Data.List using (List; []; _∷_; _++_; [_])
-open import Relation.Binary.PropositionalEquality using (_≡_; refl; cong; sym; trans; subst)
+open import Relation.Binary.PropositionalEquality
+  using (_≡_; refl; cong; sym; trans; subst)
 
 open import Algebra.Structures using (IsMonoid)
 

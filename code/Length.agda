@@ -40,17 +40,3 @@ length≡length-tail (x ∷ xs) =
       suc-pull = length-pull xs
    in trans suc-cong suc-pull
 
--- Other properties
-
-concat-length : ∀ (xs ys : List A) → length (xs ++ ys) ≡ length xs + length ys
-concat-length [] ys = refl
-concat-length (x ∷ xs) ys = cong suc (concat-length xs ys)
-
-concat-length-tail : ∀ (xs ys : List ℕ)
-                   → length-tail (xs ++ ys) 0 ≡ length-tail xs 0 + length-tail ys 0
-concat-length-tail [] ys = refl
-concat-length-tail (x ∷ xs) ys
-  rewrite sym (length-pull (xs ++ ys))
-        | sym (length-pull xs)
-        = cong suc (concat-length-tail xs ys)
-

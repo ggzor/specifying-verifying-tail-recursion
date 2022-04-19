@@ -10,6 +10,7 @@
 \usepackage[english]{babel}
 \usepackage{hyperref}
 \usepackage{color}
+\usepackage[toc,page]{appendix}
 \renewcommand\UrlFont{\color{blue}\rmfamily}
 
 \lstset{
@@ -24,6 +25,7 @@
     {∙}{{ $\cdot$ }}1
     {₂}{{ $\textsubscript{2}$ }}1
     {≟}{{ $\stackrel{?}{=}$ }}1
+    {↔}{{ $\leftrightarrow$ }}1
     {×}{{ $\times$ }}1
     ,
   inputencoding=utf8,
@@ -35,16 +37,7 @@
 \title{Specifying and Verifying a Transformation of Recursive Functions into
        Tail-Recursive Functions}
 
-\author{ Axel Suárez Polo\orcidID{0000-0002-8233-3751} \and \\
-         José de Jesús Lavalle Martínez\orcidID{0000-0001-8652-3889} \and \\
-         Iván Molina Rebolledo\orcidID{0000-0002-2224-7026}
-    }
-
 \titlerunning{Transforming recursive functions into tail-recursive functions}
-\authorrunning{A. Suárez et al.}
-
-\institute{ Benemérita Universidad Autónoma de Puebla,\\
-  Puebla, Puebla 72000, México}
 
 \maketitle
 
@@ -88,9 +81,6 @@ improve the efficiency of recursive functions \cite{bird1984promotion}. This tec
 the focus of this paper, in which dependently typed programming is used to develop a
 strategy to prove extensional equality between the original recursive programs and their
 tail-recursive counterparts.
-
-The source code of this paper is available at
-\url{https://github.com/ggzor/specifying-verifying-tail-recursion}.
 
 \section{A simple example: list length}
 
@@ -377,7 +367,7 @@ The list reversal function follows a similar pattern to the one we have seen bef
 
 It should not come as a surprise that the equality proof is very similar too:
 
-\lstinputlisting[firstline=17, lastline=39]{code/Rev.agda}
+\lstinputlisting[firstline=18, lastline=40]{code/Rev.agda}
 
 There are minor variations in the function signatures and the order of the parameters,
 but the structure is identical:
@@ -398,7 +388,7 @@ Starting from the function definitions, we can see that they follow the same rec
 pattern, we can write this pattern in Agda, which is just a specialization of a
 \lstinline{fold} function \cite{hutton1999tutorial,meijer1991functional}:
 
-\lstinputlisting[firstline=21, lastline=23]{code/GenericBasic.agda}
+\lstinputlisting[firstline=22, lastline=24]{code/GenericBasic.agda}
 
 \noindent
 where
@@ -435,7 +425,7 @@ concatenate its first argument to the right:
 The functions that follow this pattern, can be defined in a tail-recursive way as
 follows:
 
-\lstinputlisting[firstline=25, lastline=27]{code/GenericBasic.agda}
+\lstinputlisting[firstline=26, lastline=28]{code/GenericBasic.agda}
 
 We can check manually that this function matches the tail-recursive definition in the
 case of the \lstinline{reverse} function:
@@ -453,7 +443,7 @@ Now we can proceed to prove that these two functions are extensionally equal in 
 general case. The proof follows the same pattern as the one for the \lstinline{length}
 function:
 
-\lstinputlisting[firstline=49, lastline=56]{code/GenericBasic.agda}
+\lstinputlisting[firstline=50, lastline=57]{code/GenericBasic.agda}
 
 We make use of a piece of syntactic sugar called \emph{sections}, which allows us to
 write the function \lstinline{(λr→f x <> r)} as \lstinline{(f x <>_)}. Apart from that,
@@ -462,7 +452,7 @@ the proof is identical to the ones we have seen before.
 However, to prove the accumulator pulling function, we need to use a different strategy.
 We are required to prove that:
 
-\lstinputlisting[firstline=37, lastline=40]{code/GenericBasic.agda}
+\lstinputlisting[firstline=38, lastline=41]{code/GenericBasic.agda}
 
 To do this, we can prove this proposition by induction over the list, which requires us
 to prove the proposition when \lstinline{xs} is \lstinline{[]}:
@@ -490,7 +480,7 @@ This way, we can use those identities to rewrite our goals, and make them match 
 term \lstinline{r}, and then, complete the base case using the trivial equality proof
 \lstinline{refl}:
 
-\lstinputlisting[firstline=41, lastline=43]{code/GenericBasic.agda}
+\lstinputlisting[firstline=42, lastline=44]{code/GenericBasic.agda}
 
 The inductive case goal is:
 
@@ -505,12 +495,12 @@ Which cannot be proved directly by straightforward induction, as we have seen be
 at least we can simplify it by using the left identity property over
 \lstinline{empty <> f x} and then over \lstinline{empty <> r}:
 
-\lstinputlisting[firstline=44, lastline=47]{code/GenericBasic.agda}
+\lstinputlisting[firstline=45, lastline=48]{code/GenericBasic.agda}
 
 Finally, we just need to prove the generalized accumulation pulling function, which has
 the following type signature:
 
-\lstinputlisting[firstline=29, lastline=31]{code/GenericBasic.agda}
+\lstinputlisting[firstline=30, lastline=32]{code/GenericBasic.agda}
 
 Note that the base case is trivial, and it is quite similar to the ones we have already
 proved, so we are going to focus on the inductive case. Following the same kind of
@@ -550,13 +540,13 @@ satisfy. This can be expressed in Agda straightforwardly as:
 
 Which helps us complete the proof:
 
-\lstinputlisting[firstline=32, lastline=35]{code/GenericBasic.agda}
+\lstinputlisting[firstline=33, lastline=36]{code/GenericBasic.agda}
 
 All of these properties match the definition of a monoid. We can complete the
 formalization and encapsulate it in a ready to use parametrized module, using the
 standard library definition of a monoid:
 
-\lstinputlisting[firstline=4, lastline=19]{code/GenericBasic.agda}
+\lstinputlisting[firstline=5, lastline=20]{code/GenericBasic.agda}
 
 \section{Using the module with the examples}
 
@@ -571,7 +561,7 @@ The reverse function requires us to create an instance of a flipped monoid for
 \lstinline{++}, which can be done with the already defined properties for list
 concatenation, but flipping them when necessary.
 
-\lstinputlisting[firstline=32, lastline=41]{code/Instances.agda}
+\lstinputlisting[firstline=34, lastline=46]{code/Instances.agda}
 
 Finally, the \lstinline{indices} function also requires us to create a custom monoid. The
 original indices function specialized for lists of natural number is the following:
@@ -580,7 +570,7 @@ original indices function specialized for lists of natural number is the followi
 
 The monoid for this function has the following operation and identity element:
 
-\lstinputlisting[firstline=67, lastline=75]{code/Instances.agda}
+\lstinputlisting[firstline=78, lastline=86]{code/Instances.agda}
 
 \section{Conclusions}
 
@@ -608,4 +598,29 @@ data types} and \emph{recursion schemes} \cite{meijer1991functional}.
 \bibliographystyle{splncs04}
 \bibliography{refs}
 \end{thebibliography}
+
+\appendix
+
+\pagebreak
+\section{Appendix: Source code}
+
+This is the entire Agda source code for the relevant modules. If you have no prior
+experience with Agda, you can check out the following resources for a getting started
+guide:
+\url{https://agda.readthedocs.io/en/v2.6.2.1/getting-started/what-is-agda.html}
+and \url{https://plfa.github.io/GettingStarted/}. All these modules must be placed in the
+same directory.
+
+\subsection{Length.agda}
+\lstinputlisting[]{code/Length.agda}
+
+\subsection{Rev.agda}
+\lstinputlisting[]{code/Rev.agda}
+
+\subsection{GenericBasic.agda}
+\lstinputlisting[]{code/GenericBasic.agda}
+
+\subsection{Instances.agda}
+\lstinputlisting[]{code/Instances.agda}
+
 \end{document}

@@ -19,11 +19,16 @@ open import GenericBasic
 
 open import Algebra.Structures using (IsMonoid)
 open import Function using (flip)
-open import Relation.Binary.PropositionalEquality using (_≡_; sym; cong₂; refl; cong)
-open import Relation.Binary.PropositionalEquality.Properties
-  using (isEquivalence)
+
+import Relation.Binary.PropositionalEquality as Prop
+open Prop using (_≡_; sym; cong₂; refl; cong)
+import Relation.Binary.PropositionalEquality as PProp
+open PProp using (isEquivalence)
+
 open import Data.List using (List; []; _∷_; _++_)
-open import Data.List.Properties using (++-identityʳ; ++-identityˡ; ++-isMagma; ++-assoc)
+open import Data.List.Properties
+  using ( ++-identityʳ; ++-identityˡ
+        ; ++-isMagma; ++-assoc)
 open import Data.Product using (_,_)
 
 ++-flipped-isMonoid : {A : Set}
@@ -53,10 +58,16 @@ open import GenericBasic
 -----------------------------------------------
 
 open import Data.Nat using (suc)
-open import Data.Nat.Properties using (+-identityʳ; +-assoc)
+open import Data.Nat.Properties
+  using (+-identityʳ; +-assoc)
+
 open import Data.List using (map)
-open import Data.List.Relation.Unary.All using (construct)
-open import Data.List.Properties using (++-identityʳ; map-id; map-++-commute; map-compose)
+open import Data.List.Relation.Unary.All
+  using (construct)
+open import Data.List.Properties
+  using ( ++-identityʳ; map-id
+        ; map-++-commute; map-compose)
+
 open import Data.Product using (_×_; _,_; proj₂)
 open import Data.Product.Properties using (×-≡,≡↔≡)
 
@@ -91,9 +102,10 @@ map-sum (x ∷ zl) xn yn rewrite +-assoc xn yn x =
 <>-assoc : ∀ (x y z : IndicesData)
          → (x <> y) <> z ≡ x <> (y <> z)
 <>-assoc (xn , xl) (yn , yl) (zn , zl)
-  rewrite ++-assoc xl (map (_+_ xn) yl) (map (_+_ (xn + yn)) zl)
-        | map-++-commute (_+_ xn) yl (map (_+_ yn) zl)
-        | sym (map-compose {g = (_+_ xn)} {f = (_+_ yn)} zl) =
+  rewrite
+    ++-assoc xl (map (_+_ xn) yl) (map (_+_ (xn + yn)) zl)
+  | map-++-commute (_+_ xn) yl (map (_+_ yn) zl)
+  | sym (map-compose {g = (_+_ xn)} {f = (_+_ yn)} zl) =
   prod-eq (+-assoc xn yn zn)
           (cong (xl ++_)
             (cong ((map (_+_ xn) yl) ++_)
@@ -111,10 +123,15 @@ map-sum (x ∷ zl) xn yn rewrite +-assoc xn yn x =
   ; identity = <>-identityˡ , <>-identityʳ
   }
 
-open import Relation.Binary.Definitions using (Decidable)
+open import Relation.Binary.Definitions
+  using (Decidable)
 open import Relation.Nullary using (yes; no)
 
-module _ {A : Set} (_≟_ : Decidable {A = A} _≡_) (needle : A) where
+module _
+       {A : Set}
+       (_≟_ : Decidable {A = A} _≡_)
+       (needle : A) where
+
   embed : A → IndicesData
   embed x with x ≟ needle
   ... | yes _ = 1 , (0 ∷ [])
