@@ -1,55 +1,60 @@
 % vim: set tw=89 spell :
-\documentclass[runningheads]{llncs}
+\documentclass{cys}
 
-\usepackage[T1]{fontenc}
-\usepackage{listings}
+%\usepackage[T1]{fontenc}
+\usepackage{fontspec}
+
 \usepackage{graphicx}
-\usepackage{lmodern}
+%\usepackage{lmodern}
 \usepackage{colonequals}
 \usepackage{amsmath}
 \usepackage[english]{babel}
 \usepackage{hyperref}
 \usepackage{color}
+\usepackage[scaled=0.85]{beramono}
 \renewcommand\UrlFont{\color{blue}\rmfamily}
+\usepackage{unicode-math}
+\usepackage{verbatim}
+\usepackage{fancyvrb}
+\usepackage{fvextra}
+\usepackage{microtype}
 
-\lstset{
-  basicstyle=\ttfamily,
-  extendedchars=true,
-  literate=
-    {∷}{{ $\coloncolon$ }}1 {→}{{ $\rightarrow$ }}1
-    {ℕ}{{ $\mathbb{N}$ }}1 {≡}{{ $\equiv$ }}1
-    {∀}{{ $\forall$ }}1 {λ}{{$\lambda$}}1
-    {ˡ}{{ $\textsuperscript{l}$ }}1
-    {ʳ}{{ $\textsuperscript{r}$ }}1
-    {∙}{{ $\cdot$ }}1
-    {₂}{{ $\textsubscript{2}$ }}1
-    {≟}{{ $\stackrel{?}{=}$ }}1
-    {×}{{ $\times$ }}1
-    ,
-  inputencoding=utf8,
-  captionpos=b,
+% Temporal font
+\setmonofont{Fira Code}
+
+\fvset{
+  breaklines=true,
+  breakindent=2em,
 }
+
+% Inline code for math environments
+\newcommand{\MVerb}[1]{\hbox{\Verb{#1}}}
 
 \begin{document}
 
 \title{Specifying and Verifying a Transformation of Recursive Functions into
        Tail-Recursive Functions}
 
-\author{ Axel Suárez Polo\orcidID{0000-0002-8233-3751} \and \\
-         José de Jesús Lavalle Martínez\orcidID{0000-0001-8652-3889} \and \\
-         Iván Molina Rebolledo\orcidID{0000-0002-2224-7026}
-    }
+\author{Axel Suárez Polo$^1$, José de Jesús Lavalle Martínez$^1$, Iván Molina Rebolledo$^1$}
 
-\titlerunning{Transforming recursive functions into tail-recursive functions}
-\authorrunning{A. Suárez et al.}
+\affil{
+$^1$ Benemérita Universidad Autónoma de Puebla, Puebla, \authorcr
+Mexico
+\authorcr \authorcr
+author1@xxx.xx, author2@xxx.xx
+\authorcr  \authorcr
+}
 
-\institute{ Benemérita Universidad Autónoma de Puebla,\\
-  Puebla, Puebla 72000, México}
+
+%\titlerunning{Transforming recursive functions into tail-recursive functions}
+%\authorrunning{A. Suárez et al.}
+
+%\institute{ Benemérita Universidad Autónoma de Puebla,\\
+%  Puebla, Puebla 72000, México}
 
 \maketitle
 
 \begin{abstract}
-
 It is well known that some recursive functions admit a tail recursive counterpart which
 have a more efficient time-complexity behavior. This paper presents a formal
 specification and verification of such process. A monoid is used to generate a recursive
@@ -58,16 +63,15 @@ prove extensional equality of both functions. In order to achieve this goal, the
 programming language and proof assistant is used to generate a parametrized module with a
 monoid, via dependent types. This technique is exemplified with the length, reverse, and
 indices functions over lists.
-
-\keywords{    Dependent Types
-         \and Formal Specification and Verification
-         \and Tail Recursion
-         \and Accumulation
-         \and Program Transformation
-         }
 \end{abstract}
 
+\begin{keywords}
+Dependent Types, Formal Specification and Verification, Tail Recursion, Accumulation,
+Program Transformation
+\end{keywords}
+
 \section{Introduction}
+\label{sec:introduction}
 
 Dependently typed programming languages provide an expressive system that allows both
 programming and theorem proving. Agda is an implementation of such a kind of language
@@ -97,64 +101,62 @@ The source code of this paper is available at
 Let us start with a simple example: a function to compute the length of a list. This
 function can be defined recursively as follows:
 
-\lstinputlisting[firstline=8, lastline=10]{code/Length.agda}
+\VerbatimInput[firstline=8, lastline=10]{code/Length.agda}
 
 Nonetheless, this function requires space proportional to the length of the list due to
 the recursive calls. This program can be transformed into a tail-recursive function,
 which can be optimized automatically by the compiler to use constant space
 \cite{bauer2003compilation}. The transformed function is shown below:
 
-\lstinputlisting[firstline=12, lastline=14]{code/Length.agda}
+\VerbatimInput[firstline=12, lastline=14]{code/Length.agda}
 
 In this example, it is clear to see that both functions return the same result for every
 possible list we provide as input. This fact can be represented in Agda using dependent
 function types:
 
-\lstinputlisting[firstline=34, lastline=35]{code/Length.agda}
+\VerbatimInput[firstline=34, lastline=35]{code/Length.agda}
 
 The notion of ``sameness'' used here is the one of \emph{intensional equality}, which is
 an inductively defined family of types \cite{dybjer1994inductive,mu2008algebra} with the
 following definition:
 
-\begin{lstlisting}
+\begin{Verbatim}
 data _≡_ {a} {A : Set a} (x : A) : A → Set a where
   instance refl : x ≡ x
-\end{lstlisting}
+\end{Verbatim}
 
 This means that two terms are equal if they are exactly the same term. Additionally, in
 Agda, if both terms reduce to the same term, we can state that they are intensionally
-equal. For example, \lstinline{refl : 2 + 3 ≡ 5}.
+equal. For example, \Verb{refl : 2 + 3 ≡ 5}.
 
 This notion of equality together with the addition of the universal quantifier, allows us
 to state a kind of equality for functions, known as \emph{point-wise equality} or
 \emph{extensional equality} \cite{botta2021extensional}.
 
 To prove extensional equality for the length functions, we can proceed inductively over
-the list, which has the \lstinline{[]} and \lstinline{x∷xs} cases\footnote{The
-\lstinline{?} symbols are holes, which must be filled later to complete the proof, but
+the list, which has the \Verb{[]} and \Verb{x∷xs} cases\footnote{The
+\Verb{?} symbols are holes, which must be filled later to complete the proof, but
 are useful to write the proof incrementally.}:
 
-\begin{lstlisting}
+\begin{Verbatim}
 length≡length-tail : ∀ (xs : List A)
                    → length xs ≡ length-tail xs 0
 length≡length-tail [] = ?
 length≡length-tail (x ∷ xs) = ?
-\end{lstlisting}
+\end{Verbatim}
 
 The base case is trivial, because both sides of the equality in the result type reduce to
 the same term:
 \begin{align*}
-  \lstinline{length []} &= \lstinline{0} & \text{(by definition)} \\
-  \lstinline{length-tail [] 0} &= \lstinline{0}
+  \MVerb{length []} &= \MVerb{0} & \text{(by definition)} \\
+  \MVerb{length-tail [] 0} &= \MVerb{0}
 \end{align*}
 
-Therefore, we can fill the first hole in our proof with \lstinline{refl}:
+Therefore, we can fill the first hole in our proof with \Verb{refl}:
 \begin{center}
-\begin{tabular}{c}
-\begin{lstlisting}
+\begin{Verbatim}
 length≡length-tail [] = refl
-\end{lstlisting}
-\end{tabular}
+\end{Verbatim}
 \end{center}
 
 For the inductive case, we can reduce both sides of the equality instantiated with the
@@ -163,400 +165,382 @@ by querying Agda, and it is particularly useful when using the Agda mode in Emac
 \cite{wadler2018programming}. The reductions are shown below and follow from the
 definition:
 \begin{align*}
-  \lstinline{length (x∷xs)} &= \lstinline{suc (length xs)} \\
-  \lstinline{length-tail (x∷xs) 0} &= \lstinline{length-tail xs (suc 0)} \\
-                                   &= \lstinline{length-tail xs 1} \\
+  \MVerb{length (x∷xs)} &= \MVerb{suc (length xs)} \\
+  \MVerb{length-tail (x∷xs) 0} &= \MVerb{length-tail xs (suc 0)} \\
+                                   &= \MVerb{length-tail xs 1} \\
 \end{align*}
 
-We need to prove that \lstinline{suc (length xs)≡length-tail xs 1}. This time, we cannot
-simply use \lstinline{refl}, because both sides do not reduce to the same term. For this
+We need to prove that \Verb{suc (length xs)≡length-tail xs 1}. This time, we cannot
+simply use \Verb{refl}, because both sides do not reduce to the same term. For this
 reason, we can proceed to call this function recursively with the tail of the list. This
 is justified because of the Curry-Howard correspondence, and the fact that we are making
 a proof by induction. The result of the recursive call gives us the induction hypothesis:
 
-\begin{lstlisting}
+\begin{Verbatim}
 length≡length-tail (x ∷ xs) =
   let ind-h = length≡length-tail xs
    in ?
-\end{lstlisting}
+\end{Verbatim}
 
-The type of \lstinline{ind-h} is \lstinline{length xs≡length-tail xs 0}. The left sides
+The type of \Verb{ind-h} is \Verb{length xs≡length-tail xs 0}. The left sides
 of the induction hypothesis and what we are proving are almost the same. To make them
 match, we can apply the \emph{congruence} property of equality, which has the following
 type:
 
 \begin{center}
-\begin{tabular}{c}
-\begin{lstlisting}
+\begin{Verbatim}
 cong : ∀ (f : A → B) {x y} → x ≡ y → f x ≡ f y
-\end{lstlisting}
-\end{tabular}
+\end{Verbatim}
 \end{center}
 
 Applying this function to the induction hypothesis, we get the function below:
 
-\begin{lstlisting}
+\begin{Verbatim}
 length≡length-tail (x ∷ xs) =
   let ind-h = length≡length-tail xs
       suc-cong = cong suc ind-h
    in ?
-\end{lstlisting}
+\end{Verbatim}
 
-The \lstinline{suc-cong} term has the type:
+The \Verb{suc-cong} term has the type:
 
 \begin{center}
-\begin{tabular}{c}
-\begin{lstlisting}
+\begin{Verbatim}
 suc (length xs) ≡ suc (length-tail xs 0)
-\end{lstlisting}
-\end{tabular}
+\end{Verbatim}
 \end{center}
 
 As we can see the left sides match, so we can change our goal to prove that the right
-side of \lstinline{suc-cong} is equal to the right side of the goal; by making use of the
+side of \Verb{suc-cong} is equal to the right side of the goal; by making use of the
 transitive property of equality, which has the following type in Agda:
 
 \begin{center}
-\begin{tabular}{c}
-\begin{lstlisting}
+\begin{Verbatim}
 trans : ∀ {x y z} → x ≡ y → y ≡ z → x ≡ z
-\end{lstlisting}
-\end{tabular}
+\end{Verbatim}
 \end{center}
 
 Therefore, now our proof is:
 
-\begin{lstlisting}
+\begin{Verbatim}
 length≡length-tail (x ∷ xs) =
   let ind-h = length≡length-tail xs
       suc-cong = cong suc ind-h
    in trans suc-cong ?
-\end{lstlisting}
+\end{Verbatim}
 
 The type of the term required to fill the hole is:
 
 \begin{center}
-\begin{tabular}{c}
-\begin{lstlisting}
+\begin{Verbatim}
 suc (length-tail xs 0) ≡ length-tail xs 1
-\end{lstlisting}
-\end{tabular}
+\end{Verbatim}
 \end{center}
 
-We need to ``pull'' the \lstinline{1} from the accumulator somehow, and convert it to a
-\lstinline{suc} call. We can extract this new goal into a helper function:
+We need to ``pull'' the \Verb{1} from the accumulator somehow, and convert it to a
+\Verb{suc} call. We can extract this new goal into a helper function:
 
-\lstinputlisting[firstline=30, lastline=31]{code/Length.agda}
+\VerbatimInput[firstline=30, lastline=31]{code/Length.agda}
 
 We can try to prove this goal by straightforward induction over the list, but we reach a
 dead end:
 
-\begin{lstlisting}
+\begin{Verbatim}
 length-pull [] = refl
 length-pull (x ∷ xs) = ?
-\end{lstlisting}
+\end{Verbatim}
 
 The base case is trivial, following the definitions of the function, both terms reduce to
-\lstinline{1}. The problem is the inductive case, which reduces as follows:
+\Verb{1}. The problem is the inductive case, which reduces as follows:
 
 \begin{align*}
-  \lstinline{suc (length-tail (x∷xs) 0)} &= \lstinline{suc (length-tail xs (suc 0))} \\
-                                         &= \lstinline{suc (length-tail xs 1)} \\
-  \lstinline{length-tail (x∷xs) 1} &= \lstinline{length-tail xs (suc 1)} \\
-                                   &= \lstinline{length-tail xs 2} \\
+  \MVerb{suc (length-tail (x∷xs) 0)} &= \MVerb{suc (length-tail xs (suc 0))} \\
+                                         &= \MVerb{suc (length-tail xs 1)} \\
+  \MVerb{length-tail (x∷xs) 1} &= \MVerb{length-tail xs (suc 1)} \\
+                                   &= \MVerb{length-tail xs 2} \\
 \end{align*}
 
 So, we are left with the following goal, which is very similar to the one we started
 with:
 
 \begin{center}
-\begin{tabular}{c}
-\begin{lstlisting}
+\begin{Verbatim}
 suc (length-tail xs 1) ≡ length-tail xs 2
-\end{lstlisting}
-\end{tabular}
+\end{Verbatim}
 \end{center}
 
 We could try to prove this proposition by straightforward induction too, but that would
-require to prove a similar proposition for the next values \lstinline{2} and
-\lstinline{3}, and so on.
+require to prove a similar proposition for the next values \Verb{2} and
+\Verb{3}, and so on.
 
 To solve this issue, we can use a \emph{generalization} strategy to prove this inductive
 property \cite{abdali1984generalization}. The generalized property will allow us to
 vary the value of the accumulator in the different cases of the inductive proof, but we
 will need to introduce another variable for it. It is important to note that after
-processing the first \lstinline{n} items of the list, we will get
-\lstinline{n + length-tail xs 0} on the left side and \lstinline{length-tail xs n} on the
+processing the first \Verb{n} items of the list, we will get
+\Verb{n + length-tail xs 0} on the left side and \Verb{length-tail xs n} on the
 right one. Combining the generalization strategy and this fact, we can see that the
 property we have to prove is:
 
-\lstinputlisting[firstline=22, lastline=24]{code/Length.agda}
+\VerbatimInput[firstline=22, lastline=24]{code/Length.agda}
 
 This function can be proved by induction over the list:
 
-\begin{lstlisting}
+\begin{Verbatim}
 length-pull-generalized [] n p = refl
 length-pull-generalized (x ∷ xs) n p = ?
-\end{lstlisting}
+\end{Verbatim}
 
-The base case is trivial, because replacing the \lstinline{xs} argument with
-\lstinline{[]}, and following a single reduction step on both sides, the common term
-\lstinline{n + p} is reached.
+The base case is trivial, because replacing the \Verb{xs} argument with
+\Verb{[]}, and following a single reduction step on both sides, the common term
+\Verb{n + p} is reached.
 
 The inductive case is more interesting. Reducing both sides of the equation proceeds as
 follows:
 \begin{align*}
-  \lstinline{n + length-tail (x∷xs) p} &= \lstinline{n + length-tail xs (suc p)} \\
-  \lstinline{length-tail (x∷xs) (n + p)} &= \lstinline{length-tail xs (suc (n + p))}
+  \MVerb{n + length-tail (x∷xs) p} &= \MVerb{n + length-tail xs (suc p)} \\
+  \MVerb{length-tail (x∷xs) (n + p)} &= \MVerb{length-tail xs (suc (n + p))}
 \end{align*}
 
 We can see that we have pretty much the induction hypothesis, with the only difference
-being the accumulating parameter \lstinline{p}. Nevertheless, as we have generalized the
-proposition, we can pick a value for \lstinline{p} when using the induction hypothesis:
+being the accumulating parameter \Verb{p}. Nevertheless, as we have generalized the
+proposition, we can pick a value for \Verb{p} when using the induction hypothesis:
 
-\begin{lstlisting}
+\begin{Verbatim}
 length-pull-generalized (x ∷ xs) n p =
   length-pull-generalized xs n (suc p)
-\end{lstlisting}
+\end{Verbatim}
 
 This takes us closer to the goal we want to prove. Unfortunately, we are left with the
-following goal after performing the substitution of \lstinline{p} with \lstinline{suc p}:
+following goal after performing the substitution of \Verb{p} with \Verb{suc p}:
 
-\begin{lstlisting}
+\begin{Verbatim}
 n + length-tail xs (suc p) ≡ length-tail xs (n + suc p)
-\end{lstlisting}
+\end{Verbatim}
 
-This is almost what we want, except for \lstinline{suc (n + p)} not being
-equal to \lstinline{n + suc p}. However, these two terms are indeed equal, but not
+This is almost what we want, except for \Verb{suc (n + p)} not being
+equal to \Verb{n + suc p}. However, these two terms are indeed equal, but not
 definitionally, because the plus function is defined by induction on the first argument,
 and not on the second one:
 
-\begin{lstlisting}
+\begin{Verbatim}
 _+_ : Nat → Nat → Nat
 zero  + m = m
 suc n + m = suc (n + m)
-\end{lstlisting}
+\end{Verbatim}
 
 Therefore, applying reduction steps does not allow Agda to deduce the equality of these
 two terms. Fortunately, the fact that these terms are equal can be easily proved
 inductively as follows:
 
-\begin{lstlisting}
+\begin{Verbatim}
 +-suc : ∀ m n → m + suc n ≡ suc (m + n)
 +-suc zero    n = refl
 +-suc (suc m) n = cong suc (+-suc m n)
-\end{lstlisting}
+\end{Verbatim}
 
-The remaining step is to ``replace'' the \lstinline{suc (n + p)} term with
-\lstinline{n + suc p}. Agda provides the \lstinline{rewrite} construct to perform this
+The remaining step is to ``replace'' the \Verb{suc (n + p)} term with
+\Verb{n + suc p}. Agda provides the \Verb{rewrite} construct to perform this
 transformation:
 
-\lstinputlisting[firstline=26, lastline=28]{code/Length.agda}
+\VerbatimInput[firstline=26, lastline=28]{code/Length.agda}
 
 We make use of the \emph{symmetric} property of equality in the rewriting step, which
 allows us to flip the sides of the equality:
 
 \begin{center}
-\begin{tabular}{c}
-\begin{lstlisting}
+\begin{Verbatim}
 sym : ∀ {x y} → x ≡ y → y ≡ x
-\end{lstlisting}
-\end{tabular}
+\end{Verbatim}
 \end{center}
 
 With all this in place, we can finally prove the remaining goals, giving as a result the
 complete proof:
 
-\lstinputlisting[firstline=22, lastline=41]{code/Length.agda}
+\VerbatimInput[firstline=22, lastline=41]{code/Length.agda}
 
 \section{Another example: list reverse}
 
 The list reversal function follows a similar pattern to the one we have seen before:
 
-\lstinputlisting[firstline=7, lastline=13]{code/Rev.agda}
+\VerbatimInput[firstline=7, lastline=13]{code/Rev.agda}
 
 It should not come as a surprise that the equality proof is very similar too:
 
-\lstinputlisting[firstline=17, lastline=39]{code/Rev.agda}
+\VerbatimInput[firstline=17, lastline=39]{code/Rev.agda}
 
 There are minor variations in the function signatures and the order of the parameters,
 but the structure is identical:
 
 \begin{itemize}
   \item Start proving by induction on the list.
-  \item Fill the base case with \lstinline{refl}.
+  \item Fill the base case with \Verb{refl}.
   \item Take the inductive hypothesis by using a recursive call.
-  \item Apply \emph{an operator} to both sides of the equality, using \lstinline{cong}.
+  \item Apply \emph{an operator} to both sides of the equality, using \Verb{cong}.
   \item Create a function to pull the accumulator, and prove it using a generalized
         version of this function that allows varying the accumulator.
-  \item Compose the two equalities using the \lstinline{trans} function.
+  \item Compose the two equalities using the \Verb{trans} function.
 \end{itemize}
 
 \section{Generalization}
 
 Starting from the function definitions, we can see that they follow the same recursive
 pattern, we can write this pattern in Agda, which is just a specialization of a
-\lstinline{fold} function \cite{hutton1999tutorial,meijer1991functional}:
+\Verb{fold} function \cite{hutton1999tutorial,meijer1991functional}:
 
-\lstinputlisting[firstline=21, lastline=23]{code/GenericBasic.agda}
+\VerbatimInput[firstline=21, lastline=23]{code/GenericBasic.agda}
 
 \noindent
 where
 
 \begin{itemize}
-  \item \lstinline{R} is the result type of the function.
-  \item \lstinline{empty} is the term to return when the list is empty.
-  \item \lstinline{f} is a function to transform each element of the list into the result
+  \item \Verb{R} is the result type of the function.
+  \item \Verb{empty} is the term to return when the list is empty.
+  \item \Verb{f} is a function to transform each element of the list into the result
         type.
-  \item \lstinline{<>} is the function to combine the current item and the recursive
+  \item \Verb{<>} is the function to combine the current item and the recursive
         result.
 \end{itemize}
 
-In the case of the \lstinline{length} function, the result type is \mathbb{N}, the
-natural numbers; \lstinline{empty} is \lstinline{0}; the function to transform each
-element is a constant function that ignores its argument and returns \lstinline{1}; and
+In the case of the \Verb{length} function, the result type is $\mathbb{N}$, the
+natural numbers; \Verb{empty} is \Verb{0}; the function to transform each
+element is a constant function that ignores its argument and returns \Verb{1}; and
 the function to combine the current item and the result of the recursive call is the
 addition function.
 
-For the \lstinline{reverse} function, the result type is the same type as the original
-list, \lstinline{List A}; \lstinline{empty} is the empty list; the function to
+For the \Verb{reverse} function, the result type is the same type as the original
+list, \Verb{List A}; \Verb{empty} is the empty list; the function to
 transform each element creates just a singleton list from its parameter; and the function
 to combine the current transformed item and the result of the recursive call, is the
 flipped concatenation function. The flipping is necessary to make the function
 concatenate its first argument to the right:
 
 \begin{align*}
-  \lstinline{reduce (x∷xs)} &= \lstinline{(λa→a∷[]) x <> reduce xs} \\
-                            &= \lstinline{(x∷[]) <> reduce xs} \\
-                            &= \lstinline{(λxs ys→ys ++ xs) (x∷[]) (reduce xs)} \\
-                            &= \lstinline{reduce xs ++ (x∷[])} \\
+  \MVerb{reduce (x∷xs)} &= \MVerb{(λa→a∷[]) x <> reduce xs} \\
+                            &= \MVerb{(x∷[]) <> reduce xs} \\
+                            &= \MVerb{(λxs ys→ys ++ xs) (x∷[]) (reduce xs)} \\
+                            &= \MVerb{reduce xs ++ (x∷[])} \\
 \end{align*}
 
 The functions that follow this pattern, can be defined in a tail-recursive way as
 follows:
 
-\lstinputlisting[firstline=25, lastline=27]{code/GenericBasic.agda}
+\VerbatimInput[firstline=25, lastline=27]{code/GenericBasic.agda}
 
 We can check manually that this function matches the tail-recursive definition in the
-case of the \lstinline{reverse} function:
+case of the \Verb{reverse} function:
 
 \begin{align*}
-  \lstinline{reduce-tail (x∷xs) r}
-    &= \lstinline{reduce-tail xs (r <> (λa→a∷[]) x)} \\
-    &= \lstinline{reduce-tail xs (r <> (x∷[])} \\
-    &= \lstinline{... xs ((λxs ys→ys ++ xs) r (x∷[]))} \\
-    &= \lstinline{reduce-tail xs ((x∷[]) ++ r)} \\
-    &= \lstinline{reduce-tail xs (x∷r)} \\
+  \MVerb{reduce-tail (x∷xs) r}
+    &= \MVerb{reduce-tail xs (r <> (λa→a∷[]) x)} \\
+    &= \MVerb{reduce-tail xs (r <> (x∷[])} \\
+    &= \MVerb{... xs ((λxs ys→ys ++ xs) r (x∷[]))} \\
+    &= \MVerb{reduce-tail xs ((x∷[]) ++ r)} \\
+    &= \MVerb{reduce-tail xs (x∷r)} \\
 \end{align*}
 
 Now we can proceed to prove that these two functions are extensionally equal in the
-general case. The proof follows the same pattern as the one for the \lstinline{length}
+general case. The proof follows the same pattern as the one for the \Verb{length}
 function:
 
-\lstinputlisting[firstline=49, lastline=56]{code/GenericBasic.agda}
+\VerbatimInput[firstline=49, lastline=56]{code/GenericBasic.agda}
 
 We make use of a piece of syntactic sugar called \emph{sections}, which allows us to
-write the function \lstinline{(λr→f x <> r)} as \lstinline{(f x <>_)}. Apart from that,
+write the function \Verb{(λr→f x <> r)} as \Verb{(f x <>_)}. Apart from that,
 the proof is identical to the ones we have seen before.
 
 However, to prove the accumulator pulling function, we need to use a different strategy.
 We are required to prove that:
 
-\lstinputlisting[firstline=37, lastline=40]{code/GenericBasic.agda}
+\VerbatimInput[firstline=37, lastline=40]{code/GenericBasic.agda}
 
 To do this, we can prove this proposition by induction over the list, which requires us
-to prove the proposition when \lstinline{xs} is \lstinline{[]}:
+to prove the proposition when \Verb{xs} is \Verb{[]}:
 
 \begin{align*}
-  \lstinline{r <> reduce-tail [] empty} &= \lstinline{r <> empty} \\
-  \lstinline{reduce-tail [] (empty <> r)} &= \lstinline{empty <> r} \\
+  \MVerb{r <> reduce-tail [] empty} &= \MVerb{r <> empty} \\
+  \MVerb{reduce-tail [] (empty <> r)} &= \MVerb{empty <> r} \\
 \end{align*}
 
-So we are required to prove that \lstinline{r <> empty≡empty <> r}. We could require the
-\lstinline{<>} function to be commutative, but we can ``ask for less'' by just requiring
-\lstinline{empty} to be a left and right identity for \lstinline{<>}, this is expressed
+So we are required to prove that \Verb{r <> empty≡empty <> r}. We could require the
+\Verb{<>} function to be commutative, but we can ``ask for less'' by just requiring
+\Verb{empty} to be a left and right identity for \Verb{<>}, this is expressed
 in Agda as:
 
 \begin{center}
-\begin{tabular}{c}
-\begin{lstlisting}
+\begin{Verbatim}
 <>-identityˡ : ∀ (r : R) → empty <> r ≡ r
 <>-identityʳ : ∀ (r : R) → r <> empty ≡ r
-\end{lstlisting}
-\end{tabular}
+\end{Verbatim}
 \end{center}
 
 This way, we can use those identities to rewrite our goals, and make them match over the
-term \lstinline{r}, and then, complete the base case using the trivial equality proof
-\lstinline{refl}:
+term \Verb{r}, and then, complete the base case using the trivial equality proof
+\Verb{refl}:
 
-\lstinputlisting[firstline=41, lastline=43]{code/GenericBasic.agda}
+\VerbatimInput[firstline=41, lastline=43]{code/GenericBasic.agda}
 
 The inductive case goal is:
 
 \begin{align*}
-  \lstinline{r <}&\lstinline{> reduce-tail (x∷xs) empty} \\
-    &= \lstinline{r <> reduce-tail xs (empty <> f x)} \\
-  \lstinline{red}&\lstinline{uce-tail (x∷xs) (empty <> r)} \\
-    &= \lstinline{reduce-tail xs ((empty <> r) <> f x)} \\
+  \MVerb{r <}&\MVerb{> reduce-tail (x∷xs) empty} \\
+    &= \MVerb{r <> reduce-tail xs (empty <> f x)} \\
+  \MVerb{red}&\MVerb{uce-tail (x∷xs) (empty <> r)} \\
+    &= \MVerb{reduce-tail xs ((empty <> r) <> f x)} \\
 \end{align*}
 
 Which cannot be proved directly by straightforward induction, as we have seen before, but
 at least we can simplify it by using the left identity property over
-\lstinline{empty <> f x} and then over \lstinline{empty <> r}:
+\Verb{empty <> f x} and then over \Verb{empty <> r}:
 
-\lstinputlisting[firstline=44, lastline=47]{code/GenericBasic.agda}
+\VerbatimInput[firstline=44, lastline=47]{code/GenericBasic.agda}
 
 Finally, we just need to prove the generalized accumulation pulling function, which has
 the following type signature:
 
-\lstinputlisting[firstline=29, lastline=31]{code/GenericBasic.agda}
+\VerbatimInput[firstline=29, lastline=31]{code/GenericBasic.agda}
 
 Note that the base case is trivial, and it is quite similar to the ones we have already
 proved, so we are going to focus on the inductive case. Following the same kind of
 reductions we have been doing before, we can see that our goal is:
 
 \begin{align*}
-  \lstinline{r <}&\lstinline{> reduce-tail (x∷xs) s} \\
-    &= \lstinline{r <> reduce-tail xs (s <> f x)} \\
-  \lstinline{red}&\lstinline{uce-tail (x∷xs) (s <> r)} \\
-    &= \lstinline{reduce-tail xs ((r <> s) <> f x)} \\
+  \MVerb{r <}&\MVerb{> reduce-tail (x∷xs) s} \\
+    &= \MVerb{r <> reduce-tail xs (s <> f x)} \\
+  \MVerb{red}&\MVerb{uce-tail (x∷xs) (s <> r)} \\
+    &= \MVerb{reduce-tail xs ((r <> s) <> f x)} \\
 \end{align*}
 
 Following the generalization strategy, we have to call the function recursively,
-replacing the \lstinline{s} by \lstinline{s <> f x}, which almost gives what it is
+replacing the \Verb{s} by \Verb{s <> f x}, which almost gives what it is
 required, except that the right hand side accumulator is associated wrongly.
 
 \begin{center}
-\begin{tabular}{c}
-\begin{lstlisting}
+\begin{Verbatim}
 r <> reduce-tail xs (s <> f x)
    ≡ reduce-tail xs (r <> (s <> f x))
-\end{lstlisting}
-\end{tabular}
+\end{Verbatim}
 \end{center}
 
-Associativity is indeed the last property that the \lstinline{<>} function needs to
+Associativity is indeed the last property that the \Verb{<>} function needs to
 satisfy. This can be expressed in Agda straightforwardly as:
 
 \begin{center}
-\begin{tabular}{c}
-\begin{lstlisting}
+\begin{Verbatim}
 <>-assoc : ∀ (r s t : R)
          → (r <> s) <> t ≡ r <> (s <> t)
-\end{lstlisting}
-\end{tabular}
+\end{Verbatim}
 \end{center}
 
 Which helps us complete the proof:
 
-\lstinputlisting[firstline=32, lastline=35]{code/GenericBasic.agda}
+\VerbatimInput[firstline=32, lastline=35]{code/GenericBasic.agda}
 
 All of these properties match the definition of a monoid. We can complete the
 formalization and encapsulate it in a ready to use parametrized module, using the
 standard library definition of a monoid:
 
-\lstinputlisting[firstline=4, lastline=19]{code/GenericBasic.agda}
+\VerbatimInput[firstline=4, lastline=19]{code/GenericBasic.agda}
 
 \section{Using the module with the examples}
 
@@ -565,22 +549,22 @@ tail-recursive counterpart, and the proof that both functions are extensionally 
 
 The length function uses the usual sum monoid over the natural numbers:
 
-\lstinputlisting[firstline=9, lastline=14]{code/Instances.agda}
+\VerbatimInput[firstline=9, lastline=14]{code/Instances.agda}
 
 The reverse function requires us to create an instance of a flipped monoid for
-\lstinline{++}, which can be done with the already defined properties for list
+\Verb{++}, which can be done with the already defined properties for list
 concatenation, but flipping them when necessary.
 
-\lstinputlisting[firstline=32, lastline=41]{code/Instances.agda}
+\VerbatimInput[firstline=32, lastline=41]{code/Instances.agda}
 
-Finally, the \lstinline{indices} function also requires us to create a custom monoid. The
+Finally, the \Verb{indices} function also requires us to create a custom monoid. The
 original indices function specialized for lists of natural number is the following:
 
-\lstinputlisting[firstline=7, lastline=11]{code/Indices.agda}
+\VerbatimInput[firstline=7, lastline=11]{code/Indices.agda}
 
 The monoid for this function has the following operation and identity element:
 
-\lstinputlisting[firstline=67, lastline=75]{code/Instances.agda}
+\VerbatimInput[firstline=67, lastline=75]{code/Instances.agda}
 
 \section{Conclusions}
 
@@ -593,7 +577,7 @@ more space efficient function execution
 \cite{bauer2003compilation,rubio2017introduction}.
 
 There are some caveats with this technique which are exemplified by the
-\lstinline{indices} function. Even though the generated function avoids mapping over the
+\Verb{indices} function. Even though the generated function avoids mapping over the
 entire recursive call result, it introduces inefficiency by doing nested concatenations
 to the left, which leads to quadratic time complexity. This could be solved by using
 higher order functions as the accumulating monoid \cite{hughes1986novel}, but proving the
@@ -605,7 +589,14 @@ this paper.
 Further work can be done in order to generalize this result to arbitrary \emph{recursive
 data types} and \emph{recursion schemes} \cite{meijer1991functional}.
 
-\bibliographystyle{splncs04}
+% OBLIGATORY: use BIBTEX formatting!
+\small{
+\bibliographystyle{cys}
 \bibliography{refs}
-\end{thebibliography}
+}
+\normalsize
+
+\begin{biography}[]{} % Leave this section empty
+\end{biography}
+
 \end{document}
