@@ -140,23 +140,23 @@ the list, which has the \Verb{[]} and \Verb{x∷xs} cases\footnote{The
 are useful to write the proof incrementally.}:
 
 \begin{Verbatim}
-length≡length-tail : ∀ (xs : List A)
-                   → length xs ≡ length-tail xs 0
-length≡length-tail [] = ?
-length≡length-tail (x ∷ xs) = ?
+len≡len-tail : ∀ (xs : List A)
+                   → len xs ≡ len-tail xs 0
+len≡len-tail [] = ?
+len≡len-tail (x ∷ xs) = ?
 \end{Verbatim}
 
 The base case is trivial, because both sides of the equality in the result type reduce to
 the same term:
 \begin{align*}
-  \MVerb{length []} &= \MVerb{0} & \text{(by definition)} \\
-  \MVerb{length-tail [] 0} &= \MVerb{0}
+  \MVerb{len []} &= \MVerb{0} & \text{(by definition)} \\
+  \MVerb{len-tail [] 0} &= \MVerb{0}
 \end{align*}
 
 Therefore, we can fill the first hole in our proof with \Verb{refl}:
 \begin{center}
 \begin{Verbatim}
-length≡length-tail [] = refl
+len≡len-tail [] = refl
 \end{Verbatim}
 \end{center}
 
@@ -166,24 +166,24 @@ by querying Agda, and it is particularly useful when using the Agda mode in Emac
 \cite{wadler2018programming}. The reductions are shown below and follow from the
 definition:
 \begin{align*}
-  \MVerb{length (x∷xs)} &= \MVerb{suc (length xs)} \\
-  \MVerb{length-tail (x∷xs) 0} &= \MVerb{length-tail xs (suc 0)} \\
-                                   &= \MVerb{length-tail xs 1} \\
+  \MVerb{len (x∷xs)} &= \MVerb{suc (len xs)} \\
+  \MVerb{len-tail (x∷xs) 0} &= \MVerb{len-tail xs (suc 0)} \\
+                                   &= \MVerb{len-tail xs 1} \\
 \end{align*}
 
-We need to prove that \Verb{suc (length xs)≡length-tail xs 1}. This time, we cannot
+We need to prove that \Verb{suc (len xs)≡len-tail xs 1}. This time, we cannot
 simply use \Verb{refl}, because both sides do not reduce to the same term. For this
 reason, we can proceed to call this function recursively with the tail of the list. This
 is justified because of the Curry-Howard correspondence, and the fact that we are making
 a proof by induction. The result of the recursive call gives us the induction hypothesis:
 
 \begin{Verbatim}
-length≡length-tail (x ∷ xs) =
-  let ind-h = length≡length-tail xs
+len≡len-tail (x ∷ xs) =
+  let ind-h = len≡len-tail xs
    in ?
 \end{Verbatim}
 
-The type of \Verb{ind-h} is \Verb{length xs≡length-tail xs 0}. The left sides
+The type of \Verb{ind-h} is \Verb{len xs≡len-tail xs 0}. The left sides
 of the induction hypothesis and what we are proving are almost the same. To make them
 match, we can apply the \emph{congruence} property of equality, which has the following
 type:
@@ -197,8 +197,8 @@ cong : ∀ (f : A → B) {x y} → x ≡ y → f x ≡ f y
 Applying this function to the induction hypothesis, we get the function below:
 
 \begin{Verbatim}
-length≡length-tail (x ∷ xs) =
-  let ind-h = length≡length-tail xs
+len≡len-tail (x ∷ xs) =
+  let ind-h = len≡len-tail xs
       suc-cong = cong suc ind-h
    in ?
 \end{Verbatim}
@@ -207,7 +207,7 @@ The \Verb{suc-cong} term has the type:
 
 \begin{center}
 \begin{Verbatim}
-suc (length xs) ≡ suc (length-tail xs 0)
+suc (len xs) ≡ suc (len-tail xs 0)
 \end{Verbatim}
 \end{center}
 
@@ -224,8 +224,8 @@ trans : ∀ {x y z} → x ≡ y → y ≡ z → x ≡ z
 Therefore, now our proof is:
 
 \begin{Verbatim}
-length≡length-tail (x ∷ xs) =
-  let ind-h = length≡length-tail xs
+len≡len-tail (x ∷ xs) =
+  let ind-h = len≡len-tail xs
       suc-cong = cong suc ind-h
    in trans suc-cong ?
 \end{Verbatim}
@@ -234,7 +234,7 @@ The type of the term required to fill the hole is:
 
 \begin{center}
 \begin{Verbatim}
-suc (length-tail xs 0) ≡ length-tail xs 1
+suc (len-tail xs 0) ≡ len-tail xs 1
 \end{Verbatim}
 \end{center}
 
@@ -247,18 +247,18 @@ We can try to prove this goal by straightforward induction over the list, but we
 dead end:
 
 \begin{Verbatim}
-length-pull [] = refl
-length-pull (x ∷ xs) = ?
+len-pull [] = refl
+len-pull (x ∷ xs) = ?
 \end{Verbatim}
 
 The base case is trivial, following the definitions of the function, both terms reduce to
 \Verb{1}. The problem is the inductive case, which reduces as follows:
 
 \begin{align*}
-  \MVerb{suc (length-tail (x∷xs) 0)} &= \MVerb{suc (length-tail xs (suc 0))} \\
-                                         &= \MVerb{suc (length-tail xs 1)} \\
-  \MVerb{length-tail (x∷xs) 1} &= \MVerb{length-tail xs (suc 1)} \\
-                                   &= \MVerb{length-tail xs 2} \\
+  \MVerb{suc (len-tail (x∷xs) 0)} &= \MVerb{suc (len-tail xs (suc 0))} \\
+                                         &= \MVerb{suc (len-tail xs 1)} \\
+  \MVerb{len-tail (x∷xs) 1} &= \MVerb{len-tail xs (suc 1)} \\
+                                   &= \MVerb{len-tail xs 2} \\
 \end{align*}
 
 So, we are left with the following goal, which is very similar to the one we started
@@ -266,7 +266,7 @@ with:
 
 \begin{center}
 \begin{Verbatim}
-suc (length-tail xs 1) ≡ length-tail xs 2
+suc (len-tail xs 1) ≡ len-tail xs 2
 \end{Verbatim}
 \end{center}
 
@@ -279,7 +279,7 @@ property \cite{abdali1984generalization}. The generalized property will allow us
 vary the value of the accumulator in the different cases of the inductive proof, but we
 will need to introduce another variable for it. It is important to note that after
 processing the first \Verb{n} items of the list, we will get
-\Verb{n + length-tail xs 0} on the left side and \Verb{length-tail xs n} on the
+\Verb{n + len-tail xs 0} on the left side and \Verb{len-tail xs n} on the
 right one. Combining the generalization strategy and this fact, we can see that the
 property we have to prove is:
 
@@ -288,8 +288,8 @@ property we have to prove is:
 This function can be proved by induction over the list:
 
 \begin{Verbatim}
-length-pull-generalized [] n p = refl
-length-pull-generalized (x ∷ xs) n p = ?
+len-pull-generalized [] n p = refl
+len-pull-generalized (x ∷ xs) n p = ?
 \end{Verbatim}
 
 The base case is trivial, because replacing the \Verb{xs} argument with
@@ -299,8 +299,8 @@ The base case is trivial, because replacing the \Verb{xs} argument with
 The inductive case is more interesting. Reducing both sides of the equation proceeds as
 follows:
 \begin{align*}
-  \MVerb{n + length-tail (x∷xs) p} &= \MVerb{n + length-tail xs (suc p)} \\
-  \MVerb{length-tail (x∷xs) (n + p)} &= \MVerb{length-tail xs (suc (n + p))}
+  \MVerb{n + len-tail (x∷xs) p} &= \MVerb{n + len-tail xs (suc p)} \\
+  \MVerb{len-tail (x∷xs) (n + p)} &= \MVerb{len-tail xs (suc (n + p))}
 \end{align*}
 
 We can see that we have pretty much the induction hypothesis, with the only difference
@@ -308,15 +308,15 @@ being the accumulating parameter \Verb{p}. Nevertheless, as we have generalized 
 proposition, we can pick a value for \Verb{p} when using the induction hypothesis:
 
 \begin{Verbatim}
-length-pull-generalized (x ∷ xs) n p =
-  length-pull-generalized xs n (suc p)
+len-pull-generalized (x ∷ xs) n p =
+  len-pull-generalized xs n (suc p)
 \end{Verbatim}
 
 This takes us closer to the goal we want to prove. Unfortunately, we are left with the
 following goal after performing the substitution of \Verb{p} with \Verb{suc p}:
 
 \begin{Verbatim}
-n + length-tail xs (suc p) ≡ length-tail xs (n + suc p)
+n + len-tail xs (suc p) ≡ len-tail xs (n + suc p)
 \end{Verbatim}
 
 This is almost what we want, except for \Verb{suc (n + p)} not being
@@ -403,7 +403,7 @@ where
         result.
 \end{itemize}
 
-In the case of the \Verb{length} function, the result type is $\mathbb{N}$, the
+In the case of the \Verb{len} function, the result type is $\mathbb{N}$, the
 natural numbers; \Verb{empty} is \Verb{0}; the function to transform each
 element is a constant function that ignores its argument and returns \Verb{1}; and
 the function to combine the current item and the result of the recursive call is the
@@ -441,7 +441,7 @@ case of the \Verb{reverse} function:
 \end{align*}
 
 Now we can proceed to prove that these two functions are extensionally equal in the
-general case. The proof follows the same pattern as the one for the \Verb{length}
+general case. The proof follows the same pattern as the one for the \Verb{len}
 function:
 
 \VerbatimInput[firstline=49, lastline=56]{code/GenericBasic.agda}

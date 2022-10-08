@@ -5,13 +5,13 @@ open import Data.List using (List; []; _∷_; _++_)
 
 variable A : Set
 
-length : List A → ℕ
-length [] = 0
-length (x ∷ xs) = suc (length xs)
+len : List A → ℕ
+len [] = 0
+len (x ∷ xs) = suc (len xs)
 
-length-tail : List A → ℕ → ℕ
-length-tail [] n = n
-length-tail (x ∷ xs) n = length-tail xs (suc n)
+len-tail : List A → ℕ → ℕ
+len-tail [] n = n
+len-tail (x ∷ xs) n = len-tail xs (suc n)
 
 -- Functional equality
 
@@ -19,38 +19,38 @@ open import Relation.Binary.PropositionalEquality
   using (_≡_; refl; cong; trans; sym)
 open import Data.Nat.Properties using (+-suc)
 
-length-pull-generalized :
+len-pull-generalized :
     ∀ (xs : List A) (n p : ℕ)
-    → n + length-tail xs p ≡ length-tail xs (n + p)
-length-pull-generalized [] n p = refl
-length-pull-generalized (x ∷ xs) n p
+    → n + len-tail xs p ≡ len-tail xs (n + p)
+len-pull-generalized [] n p = refl
+len-pull-generalized (x ∷ xs) n p
   rewrite (sym (+-suc n p))
-        = length-pull-generalized xs n (suc p)
+        = len-pull-generalized xs n (suc p)
 
-length-pull : ∀ (xs : List A)
-            → suc (length-tail xs 0) ≡ length-tail xs 1
-length-pull xs = length-pull-generalized xs 1 0
+len-pull : ∀ (xs : List A)
+            → suc (len-tail xs 0) ≡ len-tail xs 1
+len-pull xs = len-pull-generalized xs 1 0
 
-length≡length-tail : ∀ (xs : List A)
-                   → length xs ≡ length-tail xs 0
-length≡length-tail [] = refl
-length≡length-tail (x ∷ xs) =
-  let ind-h = length≡length-tail xs
+len≡len-tail : ∀ (xs : List A)
+                   → len xs ≡ len-tail xs 0
+len≡len-tail [] = refl
+len≡len-tail (x ∷ xs) =
+  let ind-h = len≡len-tail xs
       suc-cong = cong suc ind-h
-      suc-pull = length-pull xs
+      suc-pull = len-pull xs
    in trans suc-cong suc-pull
 
 -- Other properties
 
-concat-length : ∀ (xs ys : List A) → length (xs ++ ys) ≡ length xs + length ys
-concat-length [] ys = refl
-concat-length (x ∷ xs) ys = cong suc (concat-length xs ys)
+concat-len : ∀ (xs ys : List A) → len (xs ++ ys) ≡ len xs + len ys
+concat-len [] ys = refl
+concat-len (x ∷ xs) ys = cong suc (concat-len xs ys)
 
-concat-length-tail : ∀ (xs ys : List ℕ)
-                   → length-tail (xs ++ ys) 0 ≡ length-tail xs 0 + length-tail ys 0
-concat-length-tail [] ys = refl
-concat-length-tail (x ∷ xs) ys
-  rewrite sym (length-pull (xs ++ ys))
-        | sym (length-pull xs)
-        = cong suc (concat-length-tail xs ys)
+concat-len-tail : ∀ (xs ys : List ℕ)
+                   → len-tail (xs ++ ys) 0 ≡ len-tail xs 0 + len-tail ys 0
+concat-len-tail [] ys = refl
+concat-len-tail (x ∷ xs) ys
+  rewrite sym (len-pull (xs ++ ys))
+        | sym (len-pull xs)
+        = cong suc (concat-len-tail xs ys)
 
