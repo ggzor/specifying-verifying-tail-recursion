@@ -8,9 +8,9 @@ open import Data.Nat using (ℕ; _+_)
 open import Data.Nat.Properties using (+-0-isMonoid)
 open import GenericBasic
   {A = ℕ} (λ _ → 1) _+_ 0 +-0-isMonoid
-  renaming ( reduce to length
-           ; reduce-tail to length-tail
-           ; reduce≡reduce-tail to length≡length-tail
+  renaming ( reduce to len
+           ; reduce-tail to len-tail
+           ; reduce≡reduce-tail to len≡len-tail
            )
 
 -----------------------------------------------
