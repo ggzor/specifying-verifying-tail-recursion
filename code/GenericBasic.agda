@@ -22,13 +22,13 @@ reduce : List A → R
 reduce [] = empty
 reduce (x ∷ xs) = f x <> reduce xs
 
-reduce-tail : List A → R → R
-reduce-tail [] r = r
-reduce-tail (x ∷ xs) r = reduce-tail xs (r <> f x)
+reduce-tl : List A → R → R
+reduce-tl [] r = r
+reduce-tl (x ∷ xs) r = reduce-tl xs (r <> f x)
 
 reduce-pull-generalized :
   ∀ (r s : R) (xs : List A)
-  → r <> reduce-tail xs s ≡ reduce-tail xs (r <> s)
+  → r <> reduce-tl xs s ≡ reduce-tl xs (r <> s)
 reduce-pull-generalized r s [] = refl
 reduce-pull-generalized r s (x ∷ xs)
   rewrite <>-assoc r s (f x)
@@ -36,8 +36,8 @@ reduce-pull-generalized r s (x ∷ xs)
 
 reduce-pull :
   ∀ (r : R) (xs : List A)
-  → r <> reduce-tail xs empty
-  ≡ reduce-tail xs (empty <> r)
+  → r <> reduce-tl xs empty
+  ≡ reduce-tl xs (empty <> r)
 reduce-pull r []
   rewrite <>-identityˡ r
         | <>-identityʳ r = refl
@@ -46,11 +46,11 @@ reduce-pull r (x ∷ xs)
         | <>-identityˡ r
         = reduce-pull-generalized r (f x) xs
 
-reduce≡reduce-tail : ∀ (xs : List A)
-                   → reduce xs ≡ reduce-tail xs empty
-reduce≡reduce-tail [] = refl
-reduce≡reduce-tail (x ∷ xs) =
-  let ind-h = reduce≡reduce-tail xs
+reduce≡reduce-tl : ∀ (xs : List A)
+                   → reduce xs ≡ reduce-tl xs empty
+reduce≡reduce-tl [] = refl
+reduce≡reduce-tl (x ∷ xs) =
+  let ind-h = reduce≡reduce-tl xs
       op-cong = cong (f x <>_) ind-h
       op-pull = reduce-pull (f x) xs
    in trans op-cong op-pull

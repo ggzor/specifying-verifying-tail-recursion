@@ -9,8 +9,8 @@ open import Data.Nat.Properties using (+-0-isMonoid)
 open import GenericBasic
   {A = ℕ} (λ _ → 1) _+_ 0 +-0-isMonoid
   renaming ( reduce to len
-           ; reduce-tail to len-tail
-           ; reduce≡reduce-tail to len≡len-tail
+           ; reduce-tl to len-tl
+           ; reduce≡reduce-tl to len≡len-tl
            )
 
 -----------------------------------------------
@@ -44,8 +44,8 @@ open import GenericBasic
   {A = ℕ} (λ x → x ∷ []) (flip _++_) []
            ++-flipped-isMonoid
   renaming ( reduce to reverse
-           ; reduce-tail to reverse-tail
-           ; reduce≡reduce-tail to reverse≡reverse-tail
+           ; reduce-tl to reverse-tl
+           ; reduce≡reduce-tl to reverse≡reverse-tl
            )
 
 -----------------------------------------------
@@ -128,6 +128,6 @@ module _ {A : Set} (_≟_ : Decidable {A = A} _≡_) (needle : A) where
   indices : List A → List ℕ
   indices xs = proj₂ (reduce xs)
 
-  indices-tail : List A → List ℕ
-  indices-tail xs = proj₂ (reduce-tail xs empty)
+  indices-tl : List A → List ℕ
+  indices-tl xs = proj₂ (reduce-tl xs empty)
 
