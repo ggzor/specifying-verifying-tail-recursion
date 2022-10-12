@@ -11,16 +11,21 @@
 \usepackage[english]{babel}
 \usepackage{hyperref}
 \usepackage{color}
-\usepackage[scaled=0.85]{beramono}
 \renewcommand\UrlFont{\color{blue}\rmfamily}
 \usepackage{unicode-math}
 \usepackage{verbatim}
 \usepackage{fancyvrb}
 \usepackage{fvextra}
 \usepackage{microtype}
+\usepackage{newunicodechar}
+
+\newunicodechar{ʳ}{\ensuremath{^{\text{r}}}}
+\newunicodechar{ˡ}{\ensuremath{^{\text{l}}}}
+\newunicodechar{≟}{\ensuremath{\overset{\text{?}}{=}}}
 
 % Temporal font
-\setmonofont{Fira Code}
+\setmonofont{FiraCode-VF.ttf}
+%\setmonofont{lmmono8-regular.otf}
 
 \fvset{
   breaklines=true,
@@ -42,7 +47,7 @@
 $^1$ Benemérita Universidad Autónoma de Puebla, Puebla, \authorcr
 Mexico
 \authorcr \authorcr
-\{axel.suarez, gustavo.molinar\}@alumno.buap.mx, jose.lavalle@correo.buap.mx,
+\{axel.suarez, gustavo.molinar\}@alumno.buap.mx, jose.lavalle@correo.buap.mx
 \authorcr  \authorcr
 }
 
