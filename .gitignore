@@ -312,3 +312,9 @@ cabal.project.local~
 .HTF/
 .ghc.environment.*
 
+# OS X
+*.DS_Store
+
+# Nix
+.direnv/
+.direnv
